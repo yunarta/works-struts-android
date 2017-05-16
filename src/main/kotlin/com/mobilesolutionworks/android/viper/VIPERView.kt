@@ -8,7 +8,7 @@ import android.view.View
 
 public interface VIPERView {
 
-    val root: View
+    val view: View
 
     fun finish()
 }
