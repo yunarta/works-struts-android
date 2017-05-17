@@ -1,18 +1,19 @@
 package com.mobilesolutionworks.android.viper
 
-import android.support.v7.widget.RecyclerView
-
 /**
  * Created by yunarta on 16/5/17.
  */
 
-open class VIPERCellViewHolder<T : Presentable>(view: android.view.View, val presenter: VIPERCellPresenter<T>) : RecyclerView.ViewHolder(view) {
+open class VIPERCellViewHolder<in T : Presentable>(view: android.view.View, internal val presenter: VIPERCellPresenter<T>) : StrongTypedAdapter.StrongHolder<T>(view) {
+
+    override fun present(e: T) = presenter.present(e)
 
     companion object {
-
-        public fun <V : VIPERView, E : Presentable> create(parent: android.view.ViewGroup, view: ((Int) -> android.view.View) -> V, create: (V) -> VIPERCellPresenter<E>): VIPERCellViewHolder<E> {
-            fun createView(parent: android.view.ViewGroup): (Int) -> android.view.View = { layout ->
-                android.view.LayoutInflater.from(parent.context).inflate(layout, parent, false)
+        public fun <V : VIPERViewImpl, E : Presentable> create(parent: android.view.ViewGroup, view: ((Int) -> android.view.View) -> V, create: (V) -> VIPERCellPresenter<E>): VIPERCellViewHolder<E> {
+            fun createView(parent: android.view.ViewGroup): (Int) -> android.view.View {
+                return { layout ->
+                    android.view.LayoutInflater.from(parent.context).inflate(layout, parent, false)
+                }
             }
 
             return view(createView(parent)).let { v: V ->

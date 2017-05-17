@@ -1,12 +1,13 @@
 package com.mobilesolutionworks.android.viper
 
 import android.support.v7.widget.RecyclerView
+import android.view.View
 
 /**
  * Created by yunarta on 16/5/17.
  */
 
-abstract class StrongTypedAdapter<VT : StrongTypedAdapter.ViewType, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>() {
+abstract class StrongTypedAdapter<E, VT : StrongTypedAdapter.ViewType, VH : StrongTypedAdapter.StrongHolder<E>> : RecyclerView.Adapter<VH>() {
 
     interface ViewType {
 
@@ -14,6 +15,8 @@ abstract class StrongTypedAdapter<VT : StrongTypedAdapter.ViewType, VH : Recycle
     }
 
     private val viewTypes = mutableMapOf<Int, VT>()
+
+    abstract fun getItem(position: Int): E
 
     final override fun getItemViewType(position: Int): Int {
         val viewType = getViewType(position)
@@ -31,5 +34,14 @@ abstract class StrongTypedAdapter<VT : StrongTypedAdapter.ViewType, VH : Recycle
 
     abstract fun onCreateViewHolder(inflater: android.view.LayoutInflater, parent: android.view.ViewGroup, viewType: VT): VH
 
+    final override fun onBindViewHolder(holder: VH, position: Int) {
+        holder.present(getItem(position))
+    }
+
     abstract fun getViewType(position: Int): VT
+
+    abstract class StrongHolder<in E>(val view: View) : RecyclerView.ViewHolder(view) {
+
+        abstract fun present(e: E)
+    }
 }
