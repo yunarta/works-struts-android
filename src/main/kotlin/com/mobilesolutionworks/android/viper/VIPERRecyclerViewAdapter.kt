@@ -4,14 +4,15 @@ package com.mobilesolutionworks.android.viper
  * Created by yunarta on 16/5/17.
  */
 
-abstract class VIPERRecyclerViewAdapter<VT : StrongTypedAdapter.ViewType, ET> : StrongTypedAdapter<VT, VIPERCellViewHolder<ET>>() {
+abstract class VIPERRecyclerViewAdapter<VT : StrongTypedAdapter.ViewType, ET : Presentable> : StrongTypedAdapter<VT, VIPERCellViewHolder<out ET>>() {
 
-    final override fun onBindViewHolder(holder: VIPERCellViewHolder<ET>, position: Int) {
+    final override fun onBindViewHolder(holder: VIPERCellViewHolder<out ET>, position: Int) {
         onBindViewHolder(holder.presenter, position)
     }
 
-    open fun onBindViewHolder(presenter: VIPERCellPresenter<ET>, position: Int) {
-        presenter.present(getItem(position))
+    public open fun onBindViewHolder(presenter: VIPERCellPresenter<out ET>, position: Int) {
+        val e = getItem(position)
+        presenter.present(e)
     }
 
     abstract fun getItem(position: Int): ET?

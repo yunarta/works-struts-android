@@ -6,7 +6,7 @@ import android.support.v7.widget.RecyclerView
  * Created by yunarta on 16/5/17.
  */
 
-abstract class StrongTypedAdapter<VT : com.mobilesolutionworks.android.viper.StrongTypedAdapter.ViewType, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>() {
+abstract class StrongTypedAdapter<VT : StrongTypedAdapter.ViewType, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>() {
 
     interface ViewType {
 
@@ -15,14 +15,14 @@ abstract class StrongTypedAdapter<VT : com.mobilesolutionworks.android.viper.Str
 
     private val viewTypes = mutableMapOf<Int, VT>()
 
-    override fun getItemViewType(position: Int): Int {
+    final override fun getItemViewType(position: Int): Int {
         val viewType = getViewType(position)
         viewTypes[viewType.ordinal] = viewType
 
         return viewType.ordinal
     }
 
-    override fun onCreateViewHolder(parent: android.view.ViewGroup?, viewType: Int): VH {
+    final override fun onCreateViewHolder(parent: android.view.ViewGroup?, viewType: Int): VH {
         if (parent == null) throw IllegalArgumentException("creating view holder with null parent")
         val type = viewTypes[viewType] ?: throw IllegalArgumentException("view holder created with unregistered view type")
 
