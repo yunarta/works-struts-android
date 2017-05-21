@@ -1,7 +1,5 @@
 package com.mobilesolutionworks.android.struts
 
-import android.util.Log
-
 /**
  * Created by yunarta on 13/5/17.
  */

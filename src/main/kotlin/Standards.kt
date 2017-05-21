@@ -1,5 +1,4 @@
 import com.mobilesolutionworks.android.struts.EndPoint
-import com.mobilesolutionworks.android.struts.Scheduler
 import com.mobilesolutionworks.android.struts.Struts
 
 /**

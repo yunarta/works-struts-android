@@ -1,7 +1,5 @@
 package com.mobilesolutionworks.android.struts
 
-import map
-
 
 /**
  * Created by yunarta on 13/5/17.
