@@ -19,7 +19,7 @@ open class VIPERPresenter<V : VIPERView> : WorksController() {
         return view
     }
 
-    open protected fun onAttached() {
+    open public fun onAttached() {
 
     }
 }

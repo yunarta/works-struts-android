@@ -1,31 +1,39 @@
 package com.mobilesolutionworks.android.struts
 
+import android.util.Log
+
 /**
  * Created by yunarta on 13/5/17.
  */
 
-abstract class EndPoint<out T : com.mobilesolutionworks.android.struts.EndPoint.Contract> {
+abstract class EndPoint<out T : EndPoint.Contract> {
 
-    internal var _struts: Struts.BackEnd? = null
+    interface Contract
 
+    internal var _struts: Struts.BackEnd<Scheduler.BackEnd>? = null
+    protected val struts: Struts.BackEnd<Scheduler.BackEnd>?
+        get() = _struts
+
+    protected abstract val contract: T
     internal val _contract: T
         get() = contract
 
-    protected abstract val contract: T
-
-    internal fun setup(struts: Struts.BackEnd) {
+    internal fun setup(struts: Struts.BackEnd<Scheduler.BackEnd>) {
         this._struts = struts
     }
 
-    protected val context: android.content.Context
-        get() = _struts!!.context
+    protected val context: android.content.Context?
+        get() = _struts?.context
 
-    protected val struts: Struts.BackEnd?
-        get() = _struts
+    internal fun dispatchCreate(struts: Struts.Mutable) {
+        onCreate(struts)
+    }
 
-    internal fun dispatchStart() = onStart()
+    protected abstract fun onCreate(struts: Struts.Mutable)
+
+    internal fun dispatchStart() {
+        onStart()
+    }
 
     protected abstract fun onStart()
-
-    interface Contract
 }

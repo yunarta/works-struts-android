@@ -13,7 +13,7 @@ abstract class Plugin {
         this.context = context
     }
 
-    internal fun dispatchStartInstallation(struts: com.mobilesolutionworks.android.struts.Struts.Install) = startInstallation(struts)
+    internal fun dispatchStartInstallation(struts: Struts.Install) = startInstallation(struts)
 
-    protected abstract fun startInstallation(struts: com.mobilesolutionworks.android.struts.Struts.Install)
+    protected abstract fun startInstallation(struts: Struts.Install)
 }

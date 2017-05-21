@@ -1,82 +1,100 @@
 package com.mobilesolutionworks.android.struts
 
+import android.content.Context
+import android.os.PersistableBundle
+import com.mobilesolutionworks.android.struts.jobmanager.Job
+
 /**
  * Created by yunarta on 13/5/17.
  */
 
-internal class StrutsImpl(private val _context: android.content.Context) : Struts, com.mobilesolutionworks.android.struts.Struts.Setup, com.mobilesolutionworks.android.struts.Struts.Install, com.mobilesolutionworks.android.struts.Struts.BackEnd {
+internal class StrutsImpl(val name: String, val _context: Context, plugins: Collection<Plugin>?) :
+      Struts {
 
-    private val plugins: MutableSet<Plugin>
+    private val scheduler = SchedulerImpl(name, _context)
 
-    private val objectLocator: com.mobilesolutionworks.android.struts.StrutsImpl.ObjectLocator
+    private val plugins = HashSet<Plugin>(plugins)
+
+    private val objectLocator: StrutsImpl.ObjectLocator
 
     init {
-        this.plugins = java.util.HashSet<Plugin>()
-        this.objectLocator = com.mobilesolutionworks.android.struts.StrutsImpl.ObjectLocator()
-    }
-
-    override fun installPlugin(plugin: Plugin) {
-        plugins.add(plugin)
+        this.objectLocator = StrutsImpl.ObjectLocator()
     }
 
     override val context: android.content.Context
         get() = _context
 
     fun start() {
-        // configuration phase
-        for (plugin in plugins) {
-            plugin.setContext(context)
+        plugins.map { it.setContext(context); it }
+              .map {
+                  it.dispatchStartInstallation(object : Struts.Install {
+
+                      override fun <T : EndPoint.Contract, M : EndPoint<T>> addEndPoint(name: Class<T>, endPoint: M) = this@StrutsImpl.addEndPoint(name, endPoint)
+
+                      override fun <L : EntityLocator.Contract, M : EntityLocator<L>> addLocator(name: Class<L>, locator: M) = this@StrutsImpl.addLocator(name, locator)
+
+                  })
+              }
+        objectLocator.endPoints().map {
+            it.setup(object : Struts.BackEnd<Scheduler.BackEnd> {
+                override val scheduler: Scheduler.BackEnd
+                    get() = object : Scheduler.BackEnd {
+                        override fun cancel(name: String) {
+                            this@StrutsImpl.scheduler.cancel(it, name)
+                        }
+
+                        override fun schedule(name: String, job: Job, bundle: PersistableBundle?) {
+                            this@StrutsImpl.scheduler.schedule(it, name, job, bundle)
+                        }
+                    }
+
+                override fun <T : EndPoint.Contract> endPoint(name: Class<T>): T? = this@StrutsImpl.endPoint(name)
+
+                override val context: Context
+                    get() = this@StrutsImpl.context
+
+                override fun <L : EntityLocator.Contract> locator(name: Class<L>): L? = this@StrutsImpl.locator(name)
+            })
         }
 
-        // installation phase
-        for (plugin in plugins) {
-            plugin.dispatchStartInstallation(this)
-        }
+        objectLocator.endPoints().map {
+            it.dispatchCreate(object : Struts.Mutable {
+                override val scheduler: Scheduler.Install
+                    get() = object : Scheduler.Install {
 
-        val points = objectLocator.endPoints()
-        for (point in points) {
-            point.setup(this)
-        }
-
-        val locators = objectLocator.locators()
-        for (locator in locators) {
-            locator.setup(this)
-        }
-
-        // start up phase
-        for (locator in locators) {
-            locator.setup(this)
-        }
-
-        for (point in points) {
-            point.dispatchStart()
-        }
+                        override fun register(name: String, receiver: (PersistableBundle) -> Boolean) {
+                            this@StrutsImpl.scheduler.register(it, name, receiver)
+                        }
+                    }
+            })
+            it
+        }.map { it.dispatchStart() }
     }
 
-    override fun <T : com.mobilesolutionworks.android.struts.EndPoint.Contract, M : EndPoint<T>> addEndPoint(name: Class<T>, endPoint: M) {
+    fun <T : EndPoint.Contract, M : EndPoint<T>> addEndPoint(name: Class<T>, endPoint: M) {
         objectLocator.addEndPoint(name, endPoint)
     }
 
-    override fun <L : EntityLocator.Contract, M : EntityLocator<L>> addLocator(name: Class<L>, locator: M) {
+    fun <L : EntityLocator.Contract, M : EntityLocator<L>> addLocator(name: Class<L>, locator: M) {
         objectLocator.addLocator(name, locator)
     }
 
-    override fun <T : com.mobilesolutionworks.android.struts.EndPoint.Contract> endPoint(name: Class<T>): T? {
+    override fun <T : EndPoint.Contract> endPoint(name: Class<T>): T? {
         return objectLocator.endPoint(name)
     }
 
-    override fun <L : EntityLocator.Contract> locator(name: Class<L>): L? {
+    fun <L : EntityLocator.Contract> locator(name: Class<L>): L? {
         return objectLocator.locator(name)
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal class ObjectLocator {
+    class ObjectLocator {
 
         private val moduleMap = java.util.HashMap<Class<out EndPoint.Contract>, EndPoint<*>>()
 
         private val locatorMap = java.util.HashMap<Class<out EntityLocator.Contract>, EntityLocator<*>>()
 
-        fun <T : com.mobilesolutionworks.android.struts.EndPoint.Contract, M : EndPoint<T>> addEndPoint(name: Class<T>, endPoint: M) {
+        fun <T : EndPoint.Contract, M : EndPoint<T>> addEndPoint(name: Class<T>, endPoint: M) {
             moduleMap.put(name, endPoint)
         }
 
@@ -84,7 +102,7 @@ internal class StrutsImpl(private val _context: android.content.Context) : Strut
             locatorMap.put(name, module)
         }
 
-        fun <T : com.mobilesolutionworks.android.struts.EndPoint.Contract> endPoint(name: Class<T>): T? {
+        fun <T : EndPoint.Contract> endPoint(name: Class<T>): T? {
             return moduleMap[name]?._contract as? T
         }
 
