@@ -11,11 +11,11 @@ import com.mobilesolutionworks.android.struts.jobmanager.Job
 internal class StrutsImpl(val name: String, val _context: Context, plugins: Collection<Plugin>?) :
       Struts {
 
-    private val scheduler = SchedulerImpl(name, _context)
+    val scheduler = SchedulerImpl(name, _context)
 
-    private val plugins = HashSet<Plugin>(plugins)
+    val plugins = HashSet<Plugin>(plugins)
 
-    private val objectLocator: StrutsImpl.ObjectLocator
+    val objectLocator: StrutsImpl.ObjectLocator
 
     init {
         this.objectLocator = StrutsImpl.ObjectLocator()
