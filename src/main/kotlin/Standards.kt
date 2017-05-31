@@ -30,6 +30,17 @@ public inline fun <T, R> T?.map(function: (T) -> R, otherwise: ((Throwable) -> N
     return null
 }
 
+public inline fun <M1 : EndPoint.Contract> Struts.endPoints(endPoint1: KClass<M1>, block: (m1: M1) -> Unit): Boolean? {
+    val m1: M1? = this[endPoint1]
+    when {
+        m1 != null -> {
+            block(m1)
+            return true
+        }
+        else -> return null
+    }
+}
+
 public inline fun <M1 : EndPoint.Contract, M2 : EndPoint.Contract> Struts.endPoints(endPoint1: KClass<M1>, endPoint2: KClass<M2>, block: (m1: M1, m2: M2) -> Unit): Boolean? {
     val m1: M1? = this[endPoint1]
     val m2: M2? = this[endPoint2]
@@ -42,7 +53,7 @@ public inline fun <M1 : EndPoint.Contract, M2 : EndPoint.Contract> Struts.endPoi
     }
 }
 
-public inline fun <M1 : EndPoint.Contract, M2 : EndPoint.Contract, M3: EndPoint.Contract> Struts.endPoints(endPoint1: KClass<M1>, endPoint2: KClass<M2>, endPoint3: KClass<M3>, block: (m1: M1, m2: M2, m3: M3) -> Unit): Boolean? {
+public inline fun <M1 : EndPoint.Contract, M2 : EndPoint.Contract, M3 : EndPoint.Contract> Struts.endPoints(endPoint1: KClass<M1>, endPoint2: KClass<M2>, endPoint3: KClass<M3>, block: (m1: M1, m2: M2, m3: M3) -> Unit): Boolean? {
     val m1: M1? = this[endPoint1]
     val m2: M2? = this[endPoint2]
     val m3: M3? = this[endPoint3]

@@ -22,4 +22,8 @@ open class VIPERCellViewHolder<in T : Presentable>(view: android.view.View, inte
             }
         }
     }
+
+    open fun onViewRecycled() {
+        presenter.recycling()
+    }
 }
